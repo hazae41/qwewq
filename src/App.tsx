@@ -14,15 +14,12 @@ const DarkTheme = createMuiTheme({
   }
 })
 
-function reverse(s: string) {
-  return s.split("").reverse().join("");
-}
-
 function mirror(text: string) {
   if (!text) return "";
   const sub = text.slice(0, -1);
   const last = text.slice(-1);
-  const pal = sub + last + reverse(sub);
+  const reverse = sub.split("").reverse().join("")
+  const pal = sub + last + reverse;
   return pal.toLowerCase();
 }
 
@@ -43,7 +40,6 @@ export const App = () => {
   }
 
   function onClick(e: MouseEvent) {
-    console.debug("clicked")
     if (!input.current) return
     if (!fake.current) return
     if (e.target === fake.current) return;
@@ -80,12 +76,12 @@ export const App = () => {
 
   return (
     <ThemeProvider theme={theme}>
+      <CssBaseline />
       <input
         style={inputStyle}
         onChange={onChange}
         ref={input} />
-      <CssBaseline />
-      <Box height="100vh" display="flex" >
+      <Box height="100vh">
         <Box height="20vh" />
         <Typography
           variant="h1"
