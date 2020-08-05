@@ -1,6 +1,7 @@
-import React, { useMemo, useState, useRef, useEffect } from 'react';
-import { ThemeProvider, createMuiTheme, CssBaseline, Typography, Box } from "@material-ui/core"
+import React, { useMemo, useState, useRef, useEffect, Dispatch, SetStateAction } from 'react';
+import { ThemeProvider, createMuiTheme, CssBaseline, Typography, Box, IconButton } from "@material-ui/core"
 import { CSSProperties } from '@material-ui/core/styles/withStyles';
+import { InvertColorsOutlined } from "@material-ui/icons"
 
 const LightTheme = createMuiTheme({
   palette: {
@@ -10,7 +11,8 @@ const LightTheme = createMuiTheme({
 
 const DarkTheme = createMuiTheme({
   palette: {
-    type: "dark"
+    type: "dark",
+    background: { default: "#000000" }
   }
 })
 
@@ -23,8 +25,26 @@ function mirror(text: string) {
   return pal.toLowerCase();
 }
 
+type State<T> = [T, Dispatch<SetStateAction<T>>]
+
+function useStorage<T>(key: string, def: T): State<T> {
+  const [state, setState] = useState(() => {
+    const item = localStorage.getItem(key)
+    return item ? JSON.parse(item) as T : def
+  })
+
+  useEffect(() => {
+    const item = JSON.stringify(state)
+    localStorage.setItem(key, item)
+  }, [key, state])
+
+  return [state, setState]
+}
+
 export const App = () => {
-  const [theme, setTheme] = useState(LightTheme)
+  const [theme, setTheme] = useStorage("theme", "light")
+  const switchTheme = () => setTheme(theme === "light" ? "dark" : "light")
+  const _theme = useMemo(() => theme === "light" ? DarkTheme : LightTheme, [theme])
 
   const input = useRef<HTMLInputElement>(null)
   const fake = useRef<HTMLElement>(null)
@@ -59,10 +79,16 @@ export const App = () => {
     }, 500);
   }, []);
 
+  useEffect(() => {
+    if (!fake.current) return
+    fake.current.scrollIntoView(false)
+  }, [text])
+
   const inputStyle: CSSProperties = {
     position: "absolute",
     left: "50%",
     transform: "translateY(-100px)",
+    opacity: 0
   };
 
   const textStyle: CSSProperties = {
@@ -75,12 +101,20 @@ export const App = () => {
   }
 
   return (
-    <ThemeProvider theme={theme}>
+    <ThemeProvider theme={_theme}>
       <CssBaseline />
       <input
         style={inputStyle}
         onChange={onChange}
         ref={input} />
+      <Box
+        width="100vw"
+        padding={2}
+        position="fixed">
+        <IconButton
+          onClick={switchTheme}
+          children={<InvertColorsOutlined />} />
+      </Box>
       <Box height="100vh">
         <Box height="20vh" />
         <Typography
@@ -88,6 +122,7 @@ export const App = () => {
           style={textStyle}
           children={text || (bar ? "|" : "")}
           ref={fake} />
+        <Box height="20vh" />
       </Box>
     </ThemeProvider>
   );
