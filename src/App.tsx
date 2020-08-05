@@ -44,7 +44,7 @@ function useStorage<T>(key: string, def: T): State<T> {
 export const App = () => {
   const [theme, setTheme] = useStorage("theme", "light")
   const switchTheme = () => setTheme(theme === "light" ? "dark" : "light")
-  const _theme = useMemo(() => theme === "light" ? DarkTheme : LightTheme, [theme])
+  const _theme = useMemo(() => theme === "light" ? LightTheme : DarkTheme, [theme])
 
   const input = useRef<HTMLInputElement>(null)
   const fake = useRef<HTMLElement>(null)
